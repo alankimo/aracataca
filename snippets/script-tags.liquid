@@ -1,0 +1,8 @@
+
+{%- if layout == 'theme' -%}
+<!--[if (gt IE 9)|!(IE)]><!--><script src="{{ 'theme.min.js' | asset_url }}" defer="defer"></script><!--<![endif]-->
+<!--[if lt IE 9]><script src="{{ 'theme.min.js' | asset_url }}"></script><![endif]-->
+{%- endif -%} {%- if layout == 'giftcard' -%}
+<!--[if (gt IE 9)|!(IE)]><!--><script src="{{ 'giftcard.min.js' | asset_url }}" defer="defer"></script><!--<![endif]-->
+<!--[if lt IE 9]><script src="{{ 'giftcard.min.js' | asset_url }}"></script><![endif]-->
+{%- endif -%}
