@@ -63,6 +63,9 @@
   {% endif %}
 
   {% render 'script-tags', layout: 'theme' %}
+
+  <script async type="text/javascript" data-api-key="" id="stamped-script-widget" src="https://cdn-stamped-io.azureedge.net/files/widget.min.js"></script>
+
   {{ content_for_header }}
 
 </head>
@@ -88,6 +91,8 @@
     Documentation:
       - http://shopify.com/timber#ajax-cart
   {% endcomment %}
-  {% render 'ajax-cart-template' %}
+  {% render 'ajax-cart-template' %} 
+  
+
 </body>
 </html>
