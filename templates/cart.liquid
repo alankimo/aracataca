@@ -214,25 +214,28 @@
 
                 <p class="font-size--xs md--up--font-size--s mt1">{{ 'cart.general.shipping_at_checkout' | t }}</p>
 
-                <div class="grid grid--half-gutter mt1">
-                  <div class="grid__item one-half">
-                    <input type="submit" name="update" class="btn border--none p1 block full--w bg--transparent border--primary-text color--primary-text hv--border--primary-accent hv--primary-accent" value="{{ 'cart.general.update' | t }}">
-                  </div>
-                  <div class="grid__item one-half">
-                    <input type="submit" name="checkout" class="btn border--primary-text p1 block full--w bg--primary-text color--primary-text--overlay hv--border--primary-accent hv--primary-accent--overlay hv-bg--primary-accent" value="{{ 'cart.general.checkout' | t }}">
-                  </div>
-                </div>
-
-
-                {% if additional_checkout_buttons %}
-                <div class="grid grid--half-gutter mt2">
-                  <div class="grid__item text-align--right lg--up--one-half lg--up--push-one-half">
-                    <div class="additional-checkout-buttons">
-                      {{ content_for_additional_checkout_buttons }}
+                <div>
+                  <div class="grid grid--half-gutter mt1">
+                    <div class="grid__item {%- comment -%} one-half{%- endcomment -%}">
+                      <input type="submit" name="update" class="btn border--none p1 block full--w bg--transparent border--primary-text color--primary-text hv--border--primary-accent hv--primary-accent" value="{{ 'cart.general.update' | t }}">
+                    </div>
+                    <div class="grid__item one-half">
+                      <input type="submit" name="checkout" class="btn border--primary-text p1 block full--w bg--primary-text color--primary-text--overlay hv--border--primary-accent hv--primary-accent--overlay hv-bg--primary-accent" value="{{ 'cart.general.checkout' | t }}">
                     </div>
                   </div>
+  
+                  {%- comment -%}
+                  {% if additional_checkout_buttons %}
+                  <div class="grid grid--half-gutter mt2">
+                    <div class="grid__item text-align--right">
+                      <div class="additional-checkout-buttons">
+                        {{ content_for_additional_checkout_buttons }}
+                      </div>
+                    </div>
+                  </div>
+                  {% endif %}
+                  {%- endcomment -%}
                 </div>
-                {% endif %}
 
               </div>
             </div>

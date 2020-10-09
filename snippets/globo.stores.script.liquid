@@ -1,0 +1,846 @@
+{{ 'globo.stores.scss.css' | asset_url | stylesheet_tag }}
+{% assign storePickupProduct = all_products['globo-store-pickup'] %}
+{% assign localDeliveryProduct = all_products['globo-local-delivery'] %}
+
+{% assign isMandatoryPickup = false %}
+{% assign isMandatoryDelivery = false %}
+{% assign isMandatoryShipping = false %}
+
+{% assign hasStorePickupProduct = false %}
+{% assign hasLocalDeliveryProduct = false %}
+{% assign localDeliveryProductVariantId = false %}
+{% assign item_count = cart.item_count %}
+{% assign total_price = cart.total_price %}
+{% assign total_weight = cart.total_weight %}
+
+{% for item in cart.items %}
+{% if item.product.tags contains 'in-store-pickup-only' and item.product.id != storePickupProduct.id and item.product.id != localDeliveryProduct.id %}
+{% assign isMandatoryPickup = true %}
+{% endif %}
+{% if item.product.tags contains 'local-delivery-only' and item.product.id != storePickupProduct.id and item.product.id != localDeliveryProduct.id %}
+{% assign isMandatoryDelivery = true %}
+{% endif %}
+{% if storePickupProduct and item.product.id == storePickupProduct.id %}
+{% assign item_count = item_count | minus: 1 %}
+{% assign total_weight = total_weight | minus: item.grams %}
+{% assign hasStorePickupProduct = true %}
+{% endif %}
+{% if localDeliveryProduct and item.product.id == localDeliveryProduct.id %}
+{% assign item_count = item_count | minus: 1 %}
+{% assign total_price = total_price | minus: item.final_price %}
+{% assign total_weight = total_weight | minus: item.grams %}
+{% assign hasLocalDeliveryProduct = true %}
+{% assign localDeliveryProductVariantId = item.variant_id %}
+{% endif %}
+{% endfor %}
+{% assign total_price = total_price | divided_by: 100 %}
+{% assign item_count = item_count | times: 1 %}
+<script type="text/javascript" src="{{ 'globo.stores.js' | asset_url}}"></script>
+
+{% assign shippingStatus = false %}
+{% if isMandatoryShipping %}
+  {% assign shippingStatus = true %}
+{% elsif isMandatoryPickup or isMandatoryDelivery %}
+  {% assign shippingStatus = false %}
+{% endif %}
+
+{% assign storePickupConditionStatus = false %}
+{% if isMandatoryPickup %}
+  {% assign storePickupConditionStatus = true %}
+{% elsif isMandatoryDelivery or isMandatoryShipping %}
+  {% assign storePickupConditionStatus = false %}
+{% else %}
+  {% assign storePickupConditionStatus = true %}
+    {% endif %}
+
+{% assign localDeliveryConditionStatus = false %}
+{% if isMandatoryDelivery %}
+  {% assign localDeliveryConditionStatus = true %}
+{% elsif isMandatoryPickup or isMandatoryShipping %}
+  {% assign localDeliveryConditionStatus = false %}
+{% else %}
+  {% assign localDeliveryConditionStatus = true %}
+    {% endif %}
+
+{% assign activeMethod = '' %}
+{% if shippingStatus %}{% assign activeMethod = 'Shipping' %}{% endif %}
+{% if hasStorePickupProduct and storePickupConditionStatus %}
+{% assign activeMethod = 'Store Pickup' %}
+{% elsif hasLocalDeliveryProduct and localDeliveryConditionStatus %}
+{% assign activeMethod = 'Local Delivery' %}
+{% elsif isMandatoryPickup and storePickupConditionStatus %}
+{% assign activeMethod = 'Store Pickup' %}
+{% elsif isMandatoryDelivery and localDeliveryConditionStatus %}
+{% assign activeMethod = 'Local Delivery' %}
+{% elsif activeMethod == '' and storePickupConditionStatus %}
+{% assign activeMethod = 'Store Pickup' %}
+{% elsif activeMethod == '' and localDeliveryConditionStatus %}
+{% assign activeMethod = 'Local Delivery' %}
+{% endif %}
+<script>
+  var storesConfig = {
+    appURL: 'https://stores.globosoftware.net',
+    shopURL: '{{shop.permanent_domain}}',
+    locale: {{shop.locale | json }},
+    iana_timezone: "America/Mexico_City",
+    timezone_offset: {{ 'now' | date: "%z" }},
+    now: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.000" }}',
+    now2: {
+      year: {{ "now" | date: "%Y" }},
+      month: {{ "now" | date: "%m" | minus: 1 }},
+      date: {{ "now" | date: "%d" }},
+      hour: {{ "now" | date: "%H" }},
+      minute: {{ "now" | date: "%M" }},
+      second: {{ "now" | date: "%S" }}
+    },
+    settings: {"design":{"textWidgetHeader":null,"textWarningCheckout":null,"color":{"textWidgetHeader":"#000000","methodDescriptionText":"#000000","textWarningCheckout":"#000000","textBtnGetDirections":"#000000","btnGetDirections":"#f5deb3","textShippingMethod":"#000000","shippingMethodBackground":"#fbfbfb","shippingMethodHover":"#dbe78e","textShippingMethodHover":"000000","textShippingMethodSelected":"000000","shippingMethodSelected":"#f5deb3","storeSelected":"#f5deb3","textOutOfStock":"#ff0000","textInStock":"#0000ff","calendarBackground":"#ffffff","dayHover":"#b1dcfb","daySelected":"#0089ec","calendarText":"#000000","textDayHover":"#000000","textDaySelected":"#000000","timeSlot":"#ffffff","timeSlotHover":"#b1dcfb","timeSlotSelected":"#0089ec","textTimeSlot":"#000000","textTimeSlotHover":"#000000","textTimeSlotSelected":"#000000"},"items":["shipping","storePickup","localDelivery"]},"storePickup":{"status":true,"mandatoryByTag":true,"description":"Choose the store of your preference.","limitOrder":{"status":false,"number":0},"filter":{"status":true,"name":true,"tag":true,"group":true,"radius":true},"distanceLengthUnit":"km","pickup_condition":{"subtotal":{"greater":null,"less":null},"operator":"AND","quantity":{"greater":null,"less":null},"enable_pickup":"1"},"store":{"orderBy":"1","storeDefault":53657,"orderStores":[53657]},"dateTimePicker":{"datePicker":true,"timePicker":true,"lagTime":"3","lagTimeUnit":"days","futureDay":"0"}},"general":{"googleMap":{"status":false,"apiKey":null,"style":"Standard","zoom":"12","pinIcon":"https:\/\/stores.globosoftware.net\/images\/location-512.png","distance_length_unit":"km"},"calendar":{"languageDatepicker":"en-US","weekdaysFull":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"],"weekdaysShort":["Sun","Mon","Tue","Wed","Thu","Fri","Sat"],"monthsFull":["January","February","March","April","May","June","July","August","September","October","November","December"],"monthsShort":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"today":"Today","clear":"Clear","close":"Close","format":"d mmmm, yyyy","formatTime":"h:i A","firstDay":0,"timeSlot":"15","blackout":[]},"inventory":{"hideOutOfStockLocations":false,"onlyShowOutOfStockOrInStock":false,"showUnlinkedLocations":false,"useInventoryThreshold":false,"outOfStock":{"number":0,"text":"Out of Stock"},"lowStock":{"number":5,"text":"Low Stock"},"highStock":{"number":null,"text":"High Stock"},"noInventoryFound":{"show":false,"text":null}}},"localDelivery":{"status":true,"ask_location":true,"limitOrder":{"status":false,"number":0},"mandatoryByTag":true,"description":null,"validation":"0","lag_time":"0","lag_time_unit":"days","timePicker":true,"listZipCode":null,"datePicker":"true","futureDay":"0","localDelivery_condition":{"subtotal":{"greater":null,"less":null},"operator":"AND","quantity":{"greater":null,"less":null},"enable_localDelivery":"1"},"deliveryHours":{"monday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":1},"tuesday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":1},"wednesday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":1},"thursday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":1},"friday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":1},"saturday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":0},"sunday":{"workHours":[{"start_time":"08:00","end_time":"16:00"}],"status":0}},"price_condition":{"basic":"total","conditions":[{"from":"0","to":"9999999","price":0}]},"distance":"50","distanceUnit":"km"},"shipping":{"status":false,"description":null}},
+    methods: {
+      shippingStatus: {{shippingStatus}},
+      storePickupConditionStatus: {{storePickupConditionStatus}},
+      localDeliveryConditionStatus: {{localDeliveryConditionStatus}}
+    },
+    languages: {"languages":[{"name":"English","code":"en","translate":{"widget":{"searchByNamePlaceholder":"Example: \"New York\"","enterPostalCodePlaceholder":"Enter your postal code ...","enterPostalCode":"Enter your postal code into the field below to check if you are eligible for local delivery:","dateLocalDeliveryPlaceholder":"Choose the delivery date.","dateLocalDeliveryRequiredMessage":"Please select a delivery date.","noStoreFound":"No stores were found.","shippingText":"Shipping","storePickupText":"Store Pickup","localDeliveryText":"Local Delivery","findLocationText":"Find location button","findLocationPlaceholder":"Find my location","filterByGroup":"Filter by group","filterByTag":"Filter by tag","moreInfoText":"More information","dateTimePlaceholder":"Choose datetime","pickupStoreRequiredMessage":"Please pickup a store","pickupTimeRequiredMessage":"Please select a pickup date","popupGetDirection":"Get Directions","popupPhone":"Phone","popupFax":"Fax","popupEmail":"Email","popupNote":"Note","popupOpenHour":"Opening hours","popupStoreClose":"Store Close","searchText":"Search button","searchTextPageStoreLocator":"Search","mondayText":"Monday","tuesdayText":"Tuesday","wednesdayText":"Wednesday","thursdayText":"Thursday","fridayText":"Friday","saturdayText":"Saturday","sundayText":"Sunday","zipCodeRequiredMessage":"Please enter a valid zipcode","deliveryNotAvailable":"Sorry, delivery is not available in your area.","deliveryAvailable":"Great! You are eligible for delivery.","textBtnSearchLocalDelivery":"Search"},"checkout":{"contact":{"shipping_address_title":"Pickup information"},"thank_you":{"marker":{"shipping":"Pickup address"},"shipping_address_title":"Pickup address"},"general":{"continue_to_shipping_method":"Continue"},"order_summary":{"free_shipping_discount_label":"Free pickup","shipping_label":"Store Pickup"},"shipping":{"title":"Store Pickup","waiting_on_rate_notice":"Please wait while we fetch available pickup rates...","no_rates_for_cart_or_destination_notice":"Pickup is not available for your cart or destination.","no_rates_for_country_notice":"We don't offer pickups in {{country }}.","please_enter_your_shipping_information_notice":"Please go back to the shopping cart page and choose a pickup location."},"payment":{"same_billing_address_label":"Please use the option below \u2b07","different_billing_address_label":"Use a different billing address"},"review":{"blocks":{"shipping_address_title":"Delivery To"}}},"delivery":{"contact":{"shipping_address_title":"Delivery information"},"thank_you":{"marker":{"shipping":"Delivery address"},"shipping_address_title":"Delivery address"},"general":{"continue_to_shipping_method":"Continue"},"order_summary":{"free_shipping_discount_label":"Free Delivery","shipping_label":"Local Delivery"},"shipping":{"title":"Local Delivery","waiting_on_rate_notice":"Please wait...","no_rates_for_cart_or_destination_notice":"Delivery is not available for your cart or destination.","no_rates_for_country_notice":"We don't offer delivery in {{country }}.","please_enter_your_shipping_information_notice":"Please go back to the shopping cart page and provide a postal code."},"payment":{"same_billing_address_label":"Please use the option below \u2b07","different_billing_address_label":"Use a different billing address"},"review":{"blocks":{"shipping_address_title":"Delivery To"}}}}}],"languageDefault":"en"},
+    groups: [],
+    tags: [],
+    page: "{{request.page_type}}",
+    deliveryDisableByLimit: {% if shop.metafields.globoStores.deliveryDisable %}{{shop.metafields.globoStores.deliveryDisable | json}}{%else%}[]{%endif%},
+    pickUpDisableByLimit: {% if shop.metafields.globoStores.pickupDisable %}{{shop.metafields.globoStores.pickupDisable | json}}{%else%}[]{%endif%},
+
+    storePickupProduct: {"productId":{{storePickupProduct.id | default: 0}},"variantId":{{storePickupProduct.variants[0].id | default: 0}}},
+    localDeliveryProduct: {"productId":{{localDeliveryProduct.id | default: 0}},"variants":[{%- for variant in localDeliveryProduct.variants -%}{"id":{{variant.id | default: 0}},"price":{{variant.price | money_without_currency | times: 1}}}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%}]},
+
+    isMandatoryPickup: {% if isMandatoryPickup and storePickupConditionStatus %}true{% else %}false{% endif %},
+    isMandatoryDelivery: {% if isMandatoryDelivery and localDeliveryConditionStatus %}true{% else %}false{% endif %},
+
+    stores: [],
+    cart: {
+      count: {{item_count}},
+      total: {{total_price}},
+      totalWeight: {{total_weight}},
+      pickupWeight: {{storePickupProduct.variants[0].weight | default: 0}},
+      deliveryWeight: {{localDeliveryProduct.variants[0].weight | default: 0}},
+      hasStorePickupProduct: {{hasStorePickupProduct}},
+      hasLocalDeliveryProduct: {{hasLocalDeliveryProduct}},
+      localDeliveryProductVariantId: {{localDeliveryProductVariantId}}
+    }
+  };
+</script>
+<script type="text/javascript" src="{{ 'globo.stores.data.js' | asset_url}}"></script>
+<script id="globoStoresTemplate" type="template/html">
+{% raw %}
+{% assign activeMethod = {% endraw %}"{{activeMethod}}"{% raw %} %}
+<div id="cart-store-pickup" class="row margin-tb-25">
+  {% if settings.design.textWidgetHeader %}
+  <div class="storesWidgetHeader">{{settings.design.textWidgetHeader}}</div>
+  {% endif %}
+  <ul id="shipping-methods">
+    {% for method in settings.design.items %}
+      {% if method == 'shipping' and methods.shippingStatus %}
+        <li class="shipping-method{% if activeMethod == 'Shipping' %} active{% endif %} shipping-method_shipping">
+          <label for="attributes-checkout-method-shipping" onclick="">
+            <div class="gbStore-loader">
+              <input data-toggle="#shipping-container"{% if activeMethod == 'Shipping' %} checked{% endif %} class="attributes-checkout-method" type="radio" name="attributes[Shipping Method]" value="Shipping" id="attributes-checkout-method-shipping" />
+              {% if settings.shipping.icon %}
+                {{settings.shipping.icon}}
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path style="fill:#96a0ac;" d="M15.744 16.683l.349-.199v1.717l-.349.195v-1.713zm3.414-.227l.342-.196v-1.717l-.343.195v1.718zm-1.429.813l.343-.195v-1.717l-.343.195v1.717zm.578-.329l.349-.199v-1.717l-.349.199v1.717zm-1.152.656l.343-.196v-1.717l-.343.196v1.717zm-.821.467l.343-.195v-1.717l-.343.195v1.717zm6.666-11.122v11.507l-9.75 5.552-12.25-6.978v-11.507l9.767-5.515 12.233 6.941zm-12.236-4.643l-2.106 1.19 8.891 5.234-.002.003 2.33-1.256-9.113-5.171zm1.236 10.59l-9-5.218v8.19l9 5.126v-8.098zm3.493-3.056l-8.847-5.208-2.488 1.405 8.86 5.138 2.475-1.335zm5.507-.696l-7 3.773v8.362l7-3.985v-8.15z"/></svg>
+              {% endif %}
+              <p class="gbStore_title-method-Shipping">{{translation.widget.shippingText}}</p>
+            </div>
+            <div class="gbStore-loading"></div>
+          </label>
+        </li>
+      {% endif %}
+
+      {% if method == 'storePickup' and methods.storePickupConditionStatus %}
+        <li class="shipping-method {% if activeMethod == 'Store Pickup' %} active{% endif %} shipping-method_pickup">
+          <label for="attributes-checkout-method-pickup" onclick="">
+            <div class="gbStore-loader">
+              <input data-toggle="#stores-container"{% if activeMethod == 'Store Pickup' %} checked{% endif %} class="attributes-checkout-method" type="radio" name="attributes[Shipping Method]" value="Store Pickup" id="attributes-checkout-method-pickup" />
+              {% if settings.storePickup.icon %}
+                {{settings.storePickup.icon}}
+              {% else %}
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd"><path style="fill:#96a0ac;" d="M3 18h-2c-.552 0-1-.448-1-1v-13c0-.552.448-1 1-1h13c.552 0 1 .448 1 1v2h4.667c1.117 0 1.6.576 1.936 1.107.594.94 1.536 2.432 2.109 3.378.188.312.288.67.288 1.035v4.48c0 1.089-.743 2-2 2h-1c0 1.656-1.344 3-3 3s-3-1.344-3-3h-6c0 1.656-1.344 3-3 3s-3-1.344-3-3zm3-1.2c.662 0 1.2.538 1.2 1.2 0 .662-.538 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.662.538-1.2 1.2-1.2zm12 0c.662 0 1.2.538 1.2 1.2 0 .662-.538 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.662.538-1.2 1.2-1.2zm-3-2.8h-13v2h1.765c.549-.614 1.347-1 2.235-1 .888 0 1.686.386 2.235 1h7.53c.549-.614 1.347-1 2.235-1 .888 0 1.686.386 2.235 1h1.765v-4.575l-1.711-2.929c-.179-.307-.508-.496-.863-.496h-4.426v6zm-2-9h-11v7h11v-7zm3 4v3h5l-1.427-2.496c-.178-.312-.509-.504-.868-.504h-2.705z"/></svg>
+              {% endif %}
+              <p class="gbStore_title-method-Shipping">{{translation.widget.storePickupText}}</p>
+            </div>
+            <div class="gbStore-loading"></div>
+          </label>
+        </li>
+      {% endif %}
+
+      {% if method == 'localDelivery' and methods.localDeliveryConditionStatus %}
+        <li class="shipping-method{% if activeMethod == 'Local Delivery' %} active{% endif %} shipping-method_delivery">
+            <label for="attributes-checkout-method-localDelivery" onclick="">
+                <div class="gbStore-loader">
+                    <input data-toggle="#localDeliveryContainer"{% if activeMethod == 'Local Delivery' %} checked{% endif %} class="attributes-checkout-method attributes-checkout-method-localDelivery" type="radio" name="attributes[Shipping Method]" value="Local Delivery" id="attributes-checkout-method-localDelivery" />
+                    {% if settings.localDelivery.icon %}
+                      {{settings.localDelivery.icon}}
+                    {% else %}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill-rule="evenodd" clip-rule="evenodd"><path style="fill:#96a0ac;" d="M3 18h-2c-.552 0-1-.448-1-1v-13c0-.552.448-1 1-1h13c.552 0 1 .448 1 1v2h4.667c1.117 0 1.6.576 1.936 1.107.594.94 1.536 2.432 2.109 3.378.188.312.288.67.288 1.035v4.48c0 1.089-.743 2-2 2h-1c0 1.656-1.344 3-3 3s-3-1.344-3-3h-6c0 1.656-1.344 3-3 3s-3-1.344-3-3zm3-1.2c.662 0 1.2.538 1.2 1.2 0 .662-.538 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.662.538-1.2 1.2-1.2zm12 0c.662 0 1.2.538 1.2 1.2 0 .662-.538 1.2-1.2 1.2-.662 0-1.2-.538-1.2-1.2 0-.662.538-1.2 1.2-1.2zm-3-2.8h-13v2h1.765c.549-.614 1.347-1 2.235-1 .888 0 1.686.386 2.235 1h7.53c.549-.614 1.347-1 2.235-1 .888 0 1.686.386 2.235 1h1.765v-4.575l-1.711-2.929c-.179-.307-.508-.496-.863-.496h-4.426v6zm-2-9h-11v7h11v-7zm3 4v3h5l-1.427-2.496c-.178-.312-.509-.504-.868-.504h-2.705z"/></svg>
+                    {% endif %}
+                    <p class="gbStore_title-method-Shipping">{{translation.widget.localDeliveryText}}</p>
+                </div>
+                <div class="gbStore-loading"></div>
+            </label>
+        </li>
+      {% endif %}
+    {% endfor %}
+  </ul>
+  <div class="checkout-method-content">
+    {% for method in settings.design.items %}
+    {% if method == 'shipping' and methods.shippingStatus %}
+    <div class="method-content method-content_pickup{% if activeMethod == 'Shipping' %} active{% endif %}" id="shipping-container">
+      <div class="methodDescription">{{settings.shipping.description}}</div>
+    </div>
+    {% endif %}
+    {% if method == 'storePickup' and methods.storePickupConditionStatus %}
+    <div class="method-content method-content_pickup{% if activeMethod == 'Store Pickup' %} active{% endif %}" id="stores-container">
+      <div class="methodDescription">{{settings.storePickup.description}}</div>
+      <div class="store-content">
+        <div class="search{% unless settings.storePickup.filter.status %} hidden{% endunless %}">
+          <div class="form-group{% unless settings.storePickup.filter.name %} hidden{% endunless %}">
+            <div class="input-group">
+              <input type="text" name="location" id="addressInput" placeholder="{{translation.widget.findLocationPlaceholder}}" class="form-control fuzzy-search">
+              <span class="icon"><i class="fa fa-map-marker" id="getLocation"  aria-hidden="true"></i></span>
+            </div>
+          </div>
+          <div class="form-group form-group-option">
+            {% if settings.general.googleMap.status and settings.storePickup.filter.radius %}
+            <div class="filter-select">
+              <select name="radius" id="radiusSelect">
+                {% assign distance_length_unit = 'Kilometer' %}
+                {% if settings.general.googleMap.distance_length_unit == 'm' %}{% assign distance_length_unit = 'Mile' %}{% endif %}
+                <option {% if settings.storePickup.filter.radius %}selected{% endif %} value="15">15 {{distance_length_unit}}</option>
+                <option value="25">25 {{distance_length_unit}}</option>
+                <option value="50">50 {{distance_length_unit}}</option>
+                <option value="100">100 {{distance_length_unit}}</option>
+                <option {% unless settings.storePickup.filter.radius %}selected{% endunless %} value="99999">>100 {{distance_length_unit}}</option>
+              </select>
+            </div>
+            {% endif %}
+            {% assign groups_length = groups | size %}
+            <div class="filter-select {{groups_length}} {% unless settings.storePickup.filter.group and groups_length > 0 %} hidden{% endunless %}">
+              <select name="group" id="groupSelect">
+                <option value="0">{{translation.widget.filterByGroup}}</option>
+                {% for group in groups %}
+                  <option value="{{group.id}}">{{group.name}}</option>
+                {% endfor %}
+              </select>
+            </div>
+            {% assign tags_length = tags | size %}
+            <div class="filter-select {{tags_length}}{% unless settings.storePickup.filter.tag and tags_length > 0 %} hidden{% endunless %}">
+              <select id="tagSelect" multiple="multiple" data-title="{{translation.widget.filterByTag}}">
+                {% for tag in tags %}<option value="{{tag}}">{{tag}}</option>{% endfor %}
+              </select>
+            </div>
+
+            <button type="button" name="search_locations" class="btn globo-btn">
+            	<span>{{translation.widget.searchText}}</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="map-container">
+        {% assign defaultStore = null %}
+        <div id="stores-list-table" class="store-cart">
+          <small id="storeMsg" data-notfound="{{translation.widget.noStoreFound | default: 'No stores were found.'}}" data-required="{{translation.widget.pickupStoreRequiredMessage | default: 'Please pick a store'}}" class="error location_error" style="display: none;"></small>
+          <ul id="stores-table">
+            {% for store in stores %}
+              {% if settings.storePickup.store.storeDefault and settings.storePickup.store.storeDefault == store.id %}{% assign defaultStore = store %}{% endif %}
+              <li class="stores-list-container {% if settings.storePickup.store.storeDefault and settings.storePickup.store.storeDefault == store.id %} active{% endif %}"
+                data-markerid="{{forloop.index}}"
+                data-allow-pickup="{{store.allow_pickup}}"
+                data-allow-date-picker="{{store.allow_date_picker}}"
+                data-store-id="{{store.id}}"
+                data-store-icon="{{store.icon}}"
+                data-store-lat="{{store.latitude}}"
+                data-store-lng="{{store.longitude}}"
+              >
+                <div class="stores-details stores-list-details">
+                  <div class="list-content stores-list-content">
+                    <div id="stores-title" class="stores-field store-name">{{store.name}}</div>
+                    {% if store.address %}
+                    <div id="stores-address" class="stores-field store-address">{{store.address}}</div>
+                    {% endif %}
+                    {% if store.state_alter || store.state || store.city || store.zipcode %}
+                    <div>
+                      {% if store.city %}
+                      <span id="stores-city" class="stores-field store-city">{{store.city}},</span>
+                      {% endif %}
+                      {% if store.state || store.state_alter %}
+                        <span id="stores-state" class="stores-field store-state">{% if store.state_alter %}{{store.state_alter}}{% else %}{{store.state}}{% endif %},</span>
+                      {% endif %}
+                      {% if store.zipcode %}
+                      <span id="stores-zipcode" class="stores-field store-zipcode">{{store.zipcode}}</span>
+                      {% endif %}
+                    </div>
+                    {% endif %}
+                    {% if store.country_alter || store.country %}
+                    <div>
+                      <span id="stores-country" class="stores-field store-country">{% if store.country_alter %}{{store.country_alter}}{% else %}{{store.country}}{% endif %}</span>
+                    </div>
+                    {% endif %}
+                                        {% if store.distance %}<div id="stores-distance" class="stores-field">Distance: {{store.distance}} {% if settings.general.googleMap.distance_length_unit == 'km' %}Kilometers{% elsif settings.general.googleMap.distance_length_unit == 'm' %}Miles{% endif %}</div>{% endif %}
+                                        <a href="#location-popup-{{store.id}}" class="more-info">{{translation.widget.moreInfoText}}</a>
+                    <i class="fa fa-chevron-right hidden" aria-hidden="true"></i>
+                  </div>
+                </div>
+
+                <div class="hidden">
+                  <div class="location-popup" id="location-popup-{{store.id}}">
+                    <h1>{{store.name}}</h1>
+                    <div>
+                        <span id="stores-address" class="stores-field" style="display:block;">{{store.address}}</span>
+                        <span id="stores-city" class="stores-field" style="display:block;">{{store.city}}</span>
+                        {% if store.state_alter or store.state %}
+                          <span id="stores-state" class="stores-field">{% if store.state_alter %}{{store.state_alter}}{% else %}{{store.state}}{% endif %}</span>
+                        {% endif %}
+                        <span id="stores-zipcode" class="stores-field">{{store.zipcode}}</span>,
+                        <span id="stores-country" class="stores-field">{% if store.country_alter %}{{store.country_alter}}{% else %}{{store.country}}{% endif %}</span>
+                    </div>
+                    <ul>
+                        {% if store.phone %}
+                        <li><label>{{translation.widget.popupPhone | default: 'Phone'}}</label>{{store.phone}}</li>
+                        {% endif %}
+                        {% if store.fax %}
+                        <li><label>{{translation.widget.popupFax | default: 'Fax'}}</label>{{store.fax}}</li>
+                        {% endif %}
+                        {% if store.email %}
+                        <li><label>{{translation.widget.popupEmail | default: 'Email'}}</label>{{store.email}}</li>
+                        {% endif %}
+                        {% if store.note %}
+                        <li><label>{{translation.widget.popupNote | default: 'Note'}}</label>{{store.note}}</li>
+                        {% endif %}
+                    </ul>
+                    {% capture destination %}{% if store.address %}{{store.address}}{% if store.city %},{{store.city}}{% endif %}{% if store.state_alter %},{{store.state_alter}}{% elsif store.state %},{{store.state}}{% endif %}{% if store.country_alter %},{{store.country_alter}}{% elsif store.country %},{{store.country}}{% endif %}{% elsif store.longitude and store.latitude %}{{store.latitude}},{{store.longitude}}{% endif %}{% endcapture %}
+                    <div class="direction">
+                      <a href="https://www.google.com/maps/dir/?api=1&destination={{destination | url_encode}}" target="_blank" class="btn btn-primary">{{translation.widget.popupGetDirection | default: 'Get directions'}}</a>
+                    </div>
+                    <div class="row" id="picture-row">
+                      <div class="col-xs-12 col-sm-12">
+                        <table>
+                          <tbody>
+                            <tr>
+                              {% if store.picture %}
+                                <td id="store-picture" rowspan="8"><img src="{{store.picture}}" class="img-responsive" /></td>
+                              {% endif %}
+                              <td colspan="2"><h3>{{translation.widget.popupOpenHour | default: 'Opening hours'}}</h3></td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.mondayText | default: 'Monday'}}</td>
+                              <td>
+                                {% if store.openning_hours.monday and store.openning_hours.monday.status %}
+                                  {% for period in store.openning_hours.monday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.tuesdayText | default: 'Tuesday'}}</td>
+                              <td>
+                                {% if store.openning_hours.tuesday and store.openning_hours.tuesday.status %}
+                                  {% for period in store.openning_hours.tuesday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.wednesdayText | default: 'Wednesday'}}</td>
+                              <td>
+                                {% if store.openning_hours.wednesday and store.openning_hours.wednesday.status %}
+                                  {% for period in store.openning_hours.wednesday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.thursdayText | default: 'Thursday'}}</td>
+                              <td>
+                                {% if store.openning_hours.thursday and store.openning_hours.thursday.status %}
+                                  {% for period in store.openning_hours.thursday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.fridayText | default: 'Friday'}}</td>
+                              <td>
+                                {% if store.openning_hours.friday and store.openning_hours.friday.status %}
+                                  {% for period in store.openning_hours.friday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.saturdayText | default: 'Saturday'}}</td>
+                              <td>
+                                {% if store.openning_hours.saturday and store.openning_hours.saturday.status %}
+                                  {% for period in store.openning_hours.saturday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                            <tr>
+                              <td>{{translation.widget.sundayText | default: 'Sunday'}}</td>
+                              <td>
+                                {% if store.openning_hours.sunday and store.openning_hours.sunday.status %}
+                                  {% for period in store.openning_hours.sunday.workHours %}
+                                  {{period.start_time}} - {{period.end_time}}<br>
+                                  {% endfor %}
+                                {% else %}
+                                  {{translation.widget.popupStoreClose | default: 'Closed'}}
+                                {% endif %}
+                              </td>
+                            </tr>
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% if settings.general.googleMap.status %}
+        <div id="map-table"><div id="map"></div></div>
+        {% endif %}
+        <div id="dataPickup">
+            <input class="pickupData" type="hidden" id="stores_pickupLocationId" name="attributes[Store id]" value="{% if activeMethod == 'Store Pickup' %}{{defaultStore.id | default: ""}}{% endif %}">
+            <input class="pickupData" type="hidden" id="stores_pickupCompany" name="attributes[Store name]" value="{% if activeMethod == 'Store Pickup' %}{{defaultStore.name | default: ""}}{% endif %}">
+            <textarea id="stores_Address" name="attributes[Store address]" class="pickupData hidden"></textarea>
+            <input class="pickupData" type="hidden" id="stores_pickupDate" name="attributes[Pickup date]" value="">
+        </div>
+      </div>
+      {% if settings.storePickup.dateTimePicker.datePicker %}
+      <div class="form-group pickupDateTimePicker hidden" style="display: none">
+        <input type="text" name="" id="pickupDateTime" placeholder="{{translation.widget.dateTimePlaceholder}}" class="form-control">
+        <input type="text" id="pickupDate" style="display:none;" />
+        <input type="text" id="pickupTime" style="display:none;" />
+        <small id="pickupDateTimeErrorMsg" class="error location_error" style="display:none;">{{translation.widget.pickupTimeRequiredMessage | default: "Please select a pickup date"}}</small>
+        <div id="pickupOutlet"></div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+
+    {% if method == 'localDelivery' and methods.localDeliveryConditionStatus %}
+    <div class="method-content method-content_localDelivery{% if activeMethod == 'Local Delivery' %} active{% endif %}" id="localDeliveryContainer">
+      <div class="methodDescription">{{settings.localDelivery.description}}</div>
+      <div class="form-group">
+        <label class="textEnterPostalCode">{{translation.widget.enterPostalCode}}</label>
+        <div class="input-search">
+          <input class="deliveryData" type="text" placeholder="{{translation.widget.enterPostalCodePlaceholder | default: "Enter your postal code ..."}}" id="gbStore-code" name="attributes[Postal code]">
+          <input class="deliveryData" type="hidden" id="stores_deliveryDate" name="attributes[Receipt date]" value="">
+          <button type="button" id="localDeliverySearchBtn" class="input-search_btn">{{translation.widget.textBtnSearchLocalDelivery | default: "Search"}}</button>
+        </div>
+        <small id="localDeliveryMsg" class="error location_error" data-success="{{translation.widget.deliveryAvailable | default: 'Great! You are eligible for delivery.'}}" data-error-empty="{{translation.widget.zipCodeRequiredMessage | default: 'Please enter a valid zipcode. Make sure your zipcode is spelled correctly. Try adding a city, state, or country.'}}" data-error-na="{{translation.widget.deliveryNotAvailable | default: 'Sorry, delivery is not available in your area.'}}"></small>
+      </div>
+      {% if settings.localDelivery.datePicker %}
+      <div class="form-group deliveryDateTimePicker hidden" style="display: none">
+        <label>{{translation.widget.dateLocalDeliveryPlaceholder}}</label>
+        <input type="text" name="" id="deliveryDateTime" placeholder="{{translation.widget.dateLocalDeliveryPlaceholder}}" class="form-control">
+        <input type="text" id="deliveryDate" style="display:none;" />
+        <input type="text" id="deliveryTime" style="display:none;" />
+        <small id="deliveryDateTimeErrorMsg" class="error location_error" style="display:none;">{{translation.widget.dateLocalDeliveryRequiredMessage | default: "Please select a delivery date."}}</small>
+        <div id="deliveryOutlet"></div>
+      </div>
+      {% endif %}
+    </div>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% if settings.design.textWarningCheckout %}
+  <div class="storesCheckoutWarrning">{{settings.design.textWarningCheckout}}</div>
+  {% endif %}
+</div>
+<div id="gbStoreModal" class="gbStoreModal" style="display: none">
+  <div class="gbStore-modal-inner">
+    <div class="gbStore-modal-content">
+      <span class="gbStore-close">&times;</span>
+      <div class="gbStore-modal-body location-popup"></div>
+    </div>
+  </div>
+</div>
+{% endraw %}
+</script>
+
+<script id="globoStoreTemplate" type="template/html">
+{% raw %}
+  <div class="gbStore-overlay-details-content">
+    <div class="gbStore-overlay-details-name">{{store.name}}</div>
+    {% if store.picture %}
+    <div class="gbStore-overlay-details-picture"><img src="{{store.picture}}" alt="{{store.name | escape_once}}"></div>
+    {% endif %}
+    <div class="gbStore-overlay-details-address">{{store.address}}</div>
+    <div class="gbStore-overlay-details-address-details">
+      {% if store.city %}<span id="stores-city" class="stores-field">{{store.city}}</span>{% endif %}
+      {% if store.state or store.state_alter %}<span id="stores-state" class="stores-field">{{store.state}}</span>{% endif %}
+      {% if store.zipcode %}<span id="stores-zipcode" class="stores-field">, {{store.zipcode}}</span>{% endif %}
+      {% if store.country or store.country_alter %}<span id="stores-country" class="stores-field">{{store.country}}</span>{% endif %}
+    </div>
+    {% if store.email %}<div class="gbStore-overlay-details-email">{{store.email}}</div>{% endif %}
+    {% if store.phone %}<div class="gbStore-overlay-details-phone">{{store.phone}}</div>{% endif %}
+    {% if store.fax %}<div class="gbStore-overlay-details-fax">{{store.fax}}</div>{% endif %}
+    {% if store.note %}<div class="gbStore-overlay-details-note">{{store.note}}</div>{% endif %}
+    {% capture destination %}{% if store.address %}{{store.address}}{% if store.city %},{{store.city}}{% endif %}{% if store.state_alter %},{{store.state_alter}}{% elsif store.state %},{{store.state}}{% endif %}{% if store.country_alter %},{{store.country_alter}}{% elsif store.country %},{{store.country}}{% endif %}{% elsif store.longitude and store.latitude %}{{store.latitude}},{{store.longitude}}{% endif %}{% endcapture %}
+    <div class="gbStore-overlay-details-actions">
+      <div class="gbStore-overlay-details-action gbStore-overlay-details-action--directions">
+        <a class="gbStore-overlay-details-action--directions_link" href="https://www.google.com/maps/dir/?api=1&destination={{destination | url_encode}}" target="_blank">
+          <div class="gbStore-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-navigation"><polygon points="3 11 22 2 13 21 11 13 3 11"></polygon></svg>
+          </div>
+          {{translation.widget.popupGetDirection | default: 'Get directions'}}
+        </a>
+      </div>
+    </div>
+    <div class="gbStore-overlay-hours">
+      <div class="gbStore-popup-hours_title"><p>{{translation.widget.popupOpenHour | default: 'Opening hours'}}</p></div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.mondayText | default: 'Monday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.monday and store.openning_hours.monday.status %}
+            {% for period in store.openning_hours.monday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.tuesdayText | default: 'Tuesday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.tuesday and store.openning_hours.tuesday.status %}
+            {% for period in store.openning_hours.tuesday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.wednesdayText | default: 'Wednesday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.wednesday and store.openning_hours.wednesday.status %}
+            {% for period in store.openning_hours.wednesday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.thursdayText | default: 'Thursday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.thursday and store.openning_hours.thursday.status %}
+            {% for period in store.openning_hours.thursday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.fridayText | default: 'Friday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.friday and store.openning_hours.friday.status %}
+            {% for period in store.openning_hours.friday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.saturdayText | default: 'Saturday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.saturday and store.openning_hours.saturday.status %}
+            {% for period in store.openning_hours.saturday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+      <div class="gbStore-popup-hours-item">
+        <div class="gbStore-popup-hours-item__day">{{translation.widget.sundayText | default: 'Sunday'}}: </div>
+        <div class="gbStore-popup-hours-item__time">
+          {% if store.openning_hours.sunday and store.openning_hours.sunday.status %}
+            {% for period in store.openning_hours.sunday.workHours %}
+            {{period.start_time}} - {{period.end_time}}<br>
+            {% endfor %}
+          {% else %}
+            {{translation.widget.popupStoreClose | default: 'Closed'}}
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endraw %}
+</script>
+
+<script id="globoListStoresTemplate" type="template/html">
+{% raw %}
+{% capture checkedIcon %}
+<span class="gbStore-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M173.898 439.404l-166.4-166.4c-9.997-9.997-9.997-26.206 0-36.204l36.203-36.204c9.997-9.998 26.207-9.998 36.204 0L192 312.69 432.095 72.596c9.997-9.997 26.207-9.997 36.204 0l36.203 36.204c9.997 9.997 9.997 26.206 0 36.204l-294.4 294.401c-9.998 9.997-26.207 9.997-36.204-.001z"></path></svg>
+</span>
+{% endcapture %}
+{% assign distance_length_unit = 'Kilometer' %}
+{% if settings.general.googleMap.distance_length_unit == 'm' %}{% assign distance_length_unit = 'Mile' %}{% endif %}
+<div class="container-fluid{% if settings.general.googleMap.status %} margin-tb-100{% else %} mt30 mb100{% endif %}">
+  {% if settings.general.googleMap.status %}
+  <ul class="stores-tabs">
+    <li class="active"><a href="#content1">Map</a></li>
+    <li><a href="#content2">Stores</a></li>
+  </ul>
+  <section class="stores-tab-content{% if settings.general.googleMap.status %} active{% endif %}" id="content1">
+    <div id="stores-container">
+      <div class="store-content"></div>
+      <div id="gbStore-widget" style="width: 100%; height: 100%; min-height: 400px;" data-gbstore-env="p" data-gbstore-id="KDLJynn8l2">
+        <div id="gbStore-panel">
+          <div id="gbStore-overlay">
+            <div class="gbStore-overlay-content">
+              <button class="gbStore-overlay-close-button">✕</button>
+              <div id="gbStore-overlay-details" class="gbStore-overlay-section">
+                <img class="gbStore-overlay-details-image" style="display: none;">
+                <div class="gbStore-overlay-details-content">
+                  <div class="gbStore-overlay-details-name"></div>
+                  <div class="gbStore-overlay-details-picture"></div>
+                  <div class="gbStore-overlay-details-address"></div>
+                  <div class="gbStore-overlay-details-address-details">
+                    <span id="stores-city" class="stores-field"></span>
+                    <span id="stores-state" class="stores-field"></span>
+                    <span id="stores-zipcode" class="stores-field"></span>
+                    <span id="stores-country" class="stores-field"></span>
+                  </div>
+                  <div class="gbStore-overlay-details-email"></div>
+                  <div class="gbStore-overlay-details-phone"></div>
+                  <div class="gbStore-overlay-details-fax"></div>
+                  <div class="gbStore-overlay-details-note"></div>
+                  <div class="gbStore-overlay-details-actions">
+                    <div class="gbStore-overlay-details-action gbStore-overlay-details-action--directions">
+                      <a class="gbStore-overlay-details-action--directions_link" href="https://www.google.com/maps/dir/Current+Location/370 7th Avenue, New York, NY, 100013967, US" target="_blank">
+                        <div class="gbStore-icon">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-navigation">
+                            <polygon points="3 11 22 2 13 21 11 13 3 11"></polygon>
+                          </svg>
+                        </div>
+                        Get Directions
+                      </a>
+                    </div>
+                  </div>
+                  <div class="gbStore-overlay-hours"></div>
+                  <div class="gbStore-overlay-fields"></div>
+                </div>
+              </div>
+              {% if settings.storePickup.filter.group  %}
+              <div id="gbStore-overlay-groups" class="gbStore-overlay-section">
+                <div class="gbStore-overlay-groups-header gbStore-overlay-header"><h4>Groups</h4></div>
+                <div class="gbStore-overlay-groups-list gbStore-overlay-main">
+                  {% for group in groups %}
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_group" data-group="{{group.id}}" data-group-name="{{group.name | escape}}">
+                    <div class="gbStore-overlay-list-item-name">{{group.name}}</div>
+                    {{checkedIcon}}
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              {% if settings.storePickup.filter.tag  %}
+              <div id="gbStore-overlay-tags" class="gbStore-overlay-section">
+                <div class="gbStore-overlay-tags-header gbStore-overlay-header"><h4>Tags</h4></div>
+                <div class="gbStore-overlay-tags-list gbStore-overlay-main">
+                  {% for tag in tags %}
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_tag" data-tag="{{tag | escape_once}}">
+                    <span class="gbStore-overlay-list-item-color" style="background-color: #181818"></span>
+                    <div class="gbStore-overlay-list-item-name">{{tag}}</div>
+                    {{checkedIcon}}
+                  </div>
+                  {% endfor %}
+                </div>
+              </div>
+              {% endif %}
+              {% if settings.general.googleMap.status and settings.storePickup.filter.radius %}
+              <div id="gbStore-overlay-radius" class="gbStore-overlay-section">
+                <div class="gbStore-overlay-radius-header gbStore-overlay-header"><h4>Radius</h4></div>
+                <div class="gbStore-overlay-radius-list gbStore-overlay-main">
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_radius" data-value="15" data-radius="15 {{distance_length_unit}}">
+                    <div>15 {{distance_length_unit}}</div>
+                    {{checkedIcon}}
+                  </div>
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_radius" data-value="25" data-radius="25 {{distance_length_unit}}">
+                    <div>25 {{distance_length_unit}}</div>
+                    {{checkedIcon}}
+                  </div>
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_radius" data-value="50" data-radius="50 {{distance_length_unit}}">
+                    <div>50 {{distance_length_unit}}</div>
+                    {{checkedIcon}}
+                  </div>
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_radius" data-value="100" data-radius="100 {{distance_length_unit}}">
+                    <div>100 {{distance_length_unit}}</div>
+                    {{checkedIcon}}
+                  </div>
+                  <div class="gbStore-overlay-list-item gbStore-overlay-list-item_radius is-active" data-value="999999" data-radius=">100 {{distance_length_unit}}">
+                    <div>&gt;100 {{distance_length_unit}}</div>
+                    {{checkedIcon}}
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div id="gbStore-search">
+            <div class="gbStore-search-form">
+              <div class="gbStore-query">
+                <div class="gbStore-search-icon">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" style="width: 16px; height: 16px;">
+                    <path d="M505 442.7L405.3 343c-4.5-4.5-10.6-7-17-7H372c27.6-35.3 44-79.7 44-128C416 93.1 322.9 0 208 0S0 93.1 0 208s93.1 208 208 208c48.3 0 92.7-16.4 128-44v16.3c0 6.4 2.5 12.5 7 17l99.7 99.7c9.4 9.4 24.6 9.4 33.9 0l28.3-28.3c9.4-9.4 9.4-24.6.1-34zM208 336c-70.7 0-128-57.2-128-128 0-70.7 57.2-128 128-128 70.7 0 128 57.2 128 128 0 70.7-57.2 128-128 128z"></path>
+                  </svg>
+                </div>
+                <div class="gbStore-autocomplete">
+                  <input type="text" class="gbStore-search-field" id="gbStore-search-text" placeholder="{{translation.widget.searchByNamePlaceholder | escape | default: 'Example: &quot;New York&quot;'}}" autocomplete="off">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="gbStore-panel-options">
+            {% if settings.storePickup.filter.group %}
+            <div class="gbStore-group-button gbStore-filter-option">
+              <span data-value="" data-label="{{translation.widget.filterByGroup}}" class="gbStore-group-button-value gbStore-filter-option-label">{{translation.widget.filterByGroup}}</span>
+            </div>
+            {% endif %}
+            {% if settings.general.googleMap.status and settings.storePickup.filter.radius  %}
+            <div class="gbStore-radius-button gbStore-filter-option">
+              <span data-value="999999" class="gbStore-radius-button-value gbStore-filter-option-label">&gt;100 {{distance_length_unit}}</span>
+            </div>
+            {% endif %}
+            {% if settings.storePickup.filter.tag %}
+            <div class="gbStore-tags-button  gbStore-filter-option ">
+              <span data-value="" data-label="{{translation.widget.filterByTag}}" class="gbStore-filter-option-label">{{translation.widget.filterByTag}}</span>
+            </div>
+            {% endif %}
+
+            <div class="gbStore-search-button gbStore-filter-option">
+              <span class="gbStore-filter-option-label">{{translation.widget.searchText}}</span>
+            </div>
+
+          </div>
+
+          <div class="gbStore-result-list">
+            <small id="storeMsg" data-notfound="{{translation.widget.noStoreFound | escape | default: "No stores were found."}}" class="error location_error" style="display: none;"></small>
+            {% for store in stores %}
+            <div
+              class="gbStore-result stores-list-container"
+              data-store-id="{{store.id}}"
+              data-store-icon="{{store.icon}}"
+              data-store-lat="{{store.latitude}}"
+              data-store-lng="{{store.longitude}}"
+            >
+              <div>
+                <div class="gbStore-result-name">{{store.name}}</div>
+                <div class="gbStore-result-address">{{store.address}}</div>
+                {% if store.city or store.state or store.state_alter or store.zipcode %}
+                <div>
+                  {% if store.city %}<span id="stores-city" class="stores-field store-city">{{store.city}}</span>{% endif %}
+                  {% if store.state_alter or store.state %}
+                    <span id="stores-state" class="stores-field">, {% if store.state_alter %}{{store.state_alter}}{% else %}{{store.state}}{% endif %}</span>
+                  {% endif %}
+                  {% if store.zipcode %}<span id="stores-zipcode" class="stores-field store-zipcode">, {{store.zipcode}}</span>{% endif %}
+                </div>
+                {% endif %}
+                {% if store.country_alter or store.country %}
+                <div>
+                  <span id="stores-country" class="stores-field store-country">{% if store.country_alter %}{{store.country_alter}}{% else %}{{store.country}}{% endif %}</span>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div id="map" class="map-panel" style="position: relative; overflow: hidden;"></div>
+      </div>
+      <div class="" id="store-list-detail"></div>
+    </div>
+  </section>
+  {% endif %}
+
+  <section class="stores-tab-content{% unless settings.general.googleMap.status %} active{% endunless %}" id="content2">
+    <div class="group-title">
+      {% for group in groups %}
+        <div class="group-heading">
+          <h4><a href="#group-{{group.id}}">{{group.name}}</a></h4>
+        </div>
+      {% endfor %}
+    </div>
+
+    <div class="store-wrapper">
+      <div class="g-md-1-3">
+        {% for store in stores %}
+          {% if store.group_id == 0 %}
+            <div class="stores-detail">
+              <div class="store-name">{{store.name}}</div>
+              <div class="store-address">{{store.address}}</div>
+              <div class="store-info">
+                <span class="store-city">{{store.city}}</span>
+                <span class="store-state">{{store.state}}</span>
+                <span class="store-zipcode">{{store.zipcode}}</span>
+              </div>
+              <div class="store-country">{% if store.country_alter %}{{store.country_alter}}{% elsif store.country %}{{store.country}}{% endif %}</div>
+            </div>
+          {% endif %}
+        {% endfor %}
+      </div>
+      {% for group in groups %}
+        <div class="g-md-1-3" id="group-{{group.id}}">
+          <h1>{{group.name}}</h1>
+          {% for store in stores %}
+            {% if group.id == store.group_id %}
+              <div class="stores-detail">
+                <div class="store-name">{{store.name}}</div>
+                <div class="store-address">{{store.address}}</div>
+                <div class="store-info">
+                  <span class="store-city">{{store.city}}</span>
+                  <span class="store-state">{{store.state}}</span>
+                  <span class="store-zipcode">{{store.zipcode}}</span>
+                </div>
+                <div class="store-country">{% if store.country_alter %}{{store.country_alter}}{% elsif store.country %}{{store.country}}{% endif %}</div>
+              </div>
+            {% endif %}
+          {% endfor %}
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+</div>
+{% endraw %}
+</script>
