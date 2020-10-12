@@ -2,15 +2,10 @@
 
 {%- assign feature_image_placeholder = false -%}
 {% assign banner_enabled = false %}
-{% assign banner_alternate_logo_enabled = false %}
 {% for block in section.blocks %}
   {% if block.type == 'banner' and template.name == 'index' %}
     {% assign banner_enabled = true %}
     {% assign section_color = block.settings.overlay_text_color %}
-    {% if block.settings.logo_alternate %}
-      {% assign banner_alternate_logo_enabled = true %}
-      {% assign banner_alternate_logo = block.settings.logo_alternate %}
-    {% endif %}
   {% endif %}
 {% endfor %}
 
@@ -59,7 +54,7 @@
 </script>
 {% endif %}
 
-<div data-section-id="{{ section.id }}" data-section-type="header"  data-template="{{ template.name }}" {{ sticky_data }} {{ sticky_header_banner }} {% if banner_alternate_logo_enabled %}data-banner-logo-image-enabled="true"{% endif %}>
+<div data-section-id="{{ section.id }}" data-section-type="header"  data-template="{{ template.name }}" {{ sticky_data }} {{ sticky_header_banner }}>
 
   {% unless banner_enabled  %}
   <div class="header-placeholder full--w hide" data-header-placeholder></div>
@@ -187,20 +182,8 @@
                     <img src="{{ logo | img_url: image_size }}"
                          srcset="{{ logo| img_url: image_size }} 1x, {{ logo| img_url: image_size, scale: 2 }} 2x"
                          alt="{{ logo.alt | default: shop.name }}"
-                         class="logo-default {% if banner_alternate_logo_enabled %}md--dn--hide lg--up--hide{% endif %}"
+                         class="logo-default"
                          data-logo-default>
-
-                    {% if banner_alternate_logo_enabled %}
-                      {% assign logo = banner_alternate_logo %}
-                      {% capture image_size %}{{ section.settings.logo_max_width }}x{% endcapture %}
-                      <img src="{{ logo | img_url: image_size }}"
-                          srcset="{{ logo| img_url: image_size }} 1x, {{ logo| img_url: image_size, scale: 2 }} 2x"
-                          alt="{{ logo.alt | default: shop.name }}"
-                          class="logo-alternate"
-                          data-logo-alternate>
-                    {% endif %}
-
-
                   {% else %}
                     {{ shop.name }}
                   {% endif %}
@@ -318,87 +301,181 @@
     {% endcomment %}
     <div class="header__active-overlay" data-header-overlay></div>
     {%- assign section_color = 'active' -%}
-
   </header>
 
   {% if banner_enabled %}
+    <div class="header-banner-slider full--vh full--w">
+      {% for block in section.blocks %}
+        {% if block.type == 'banner' and template.name == 'index' %}
+          {% assign section_color = block.settings.overlay_text_color %}
+          {% if block.settings.image %}
+            <div class="banner  relative {% unless block.settings.image_style == 'fit_content' %}full--vh full--vh-slick full--w{% endunless %} js banner_image full--w" data-banner-image {{ block.shopify_attributes }}>
+              {% assign feature_image = block.settings.image %}
+              {% assign feature_image_mobile = block.settings.image_mobile %}
+              {% if block.settings.image_style == 'fit_content' %}
+                <div {% if feature_image_mobile %}class="md--dn--hide"{% endif %}>
+                {% render 'responsive-image' with
+                  image: feature_image,
+                  max_width: 2000,
+                  max_height: 2000,
+                  section_color: section_color,
+                %}
+                </div>
+                {% if feature_image_mobile %}
+                <div class="lg--up--hide">
+                {% render 'responsive-image' with
+                  image: feature_image_mobile,
+                  max_width: 2000,
+                  max_height: 2000,
+                  section_color: section_color,
+                %}
+                </div>
+                {% endif %}
+              {% else %}
+                <div class="lazyload bg-cover absolute top--0 right--0 bottom--0 left--0 {% if feature_image_mobile %}md--dn--hide{% endif %}"
+                    data-bgset="{% render 'bgset', image: feature_image %}"
+                    data-sizes="auto"
+                    data-parent-fit="cover"
+                    >
+                </div>
+                {% if feature_image_mobile %}
+                <div class="lazyload bg-cover absolute top--0 right--0 bottom--0 left--0 lg--up--hide"
+                    data-bgset="{% render 'bgset', image: feature_image_mobile %}"
+                    data-sizes="auto"
+                    data-parent-fit="cover"
+                    >
+                </div>
+                {% endif %}
+              {% endif %}
+
+              {%- assign heading = block.settings.heading -%}
+              {%- assign cta_text = block.settings.cta_text -%}
+              {%- assign cta_url = block.settings.cta_url -%}
+              {%- assign content_position = block.settings.content_position -%}
+              {%- assign text_align = block.settings.text_align -%}
+              {% if cta_url != blank or heading != blank %}
+                <div class="absolute top--0 right--0  bottom--0 left--0  px2 py4 lg--up--px3 wd--p5 z1">
+                  {% assign content_position = content_position | split: ' ' %}
+                  <div class="table full {% if section.settings.show_announcement %}{% if section.settings.home_page_only == false or template.name == 'index' %}pt3{% endif %}{% endif %}">
+                    <div class="table-cell {{ content_position[0] }} {{ content_position[1] }}">
+                      <div class="inline-block {{ text_align }} three-quarters lg--up--two-thirds">
+                        <div class="one-whole">
+                          {% if heading != blank %}
+                            <h2 class="color--{{ section_color }}-text f--heading font-size--xxxl line-height--8 pm--font-size--xxxxxl pm--line-height--11 wd--font-size--xxxxxxl wd--line-height--13">{{ heading }}</h2>
+                          {% endif %}
+                          {% if cta_url != blank %}
+                            <a class="mt2 btn border--none btn--add-to-cart relative color-scheme--{{ section_color }} border--none bg--{{ section_color }}-text color--{{ section_color }}-text--overlay hover-bg--{{ section_color }} p1 px2 inline-block" href="{{ cta_url }}" target="_blank" >
+                              {{ cta_text }}
+                            </a>
+                          {% endif %}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+              <div class="absolute bottom--0 left--0 right--0 flex items--center justify--center p2 z3">
+                <a class="block pointer"  data-banner-scroll>
+                  <button class="btn border--none border--none bg--transparent color--{{ section_color }}-text hv--primary-accent font-size--l">{% render 'icon-arrow-down' %}</button>
+                </a>
+              </div>
+            </div>
+          {% else %}
+            <div class="banner__placeholder  relative {% unless block.settings.image_style == 'fit_content' %}full--vh full--vh-slick full--w{% endunless %} bg--placeholder-dark js banner_image full--w"
+            data-banner-image {{ block.shopify_attributes }}>
+              <div class="banner__placeholder-svg full--w full--h color--{{ section_color }}-text {% if block.settings.image_style == 'full_screen' %}flex items--center justify--center{% endif %}" {% if block.settings.image_style == 'fit_content' %}style="padding-bottom: 40%;"{% endif %}>
+                <div class="full {% if block.settings.image_style == 'fit_content' %}absolute top--0 left--0 right--0 bottom--0{% endif %}">{{ 'lifestyle-1' | placeholder_svg_tag }}</div>
+              </div>
+              <a class="absolute pointer full top--0 left--0 flex items--end justify--center pb2"  data-banner-scroll>
+                <button class="btn border--none border--none bg--transparent color--{{ section_color }}-text hv--{{ section_color }}-accent font-size--l">{% render 'icon-arrow-down' %}</button>
+              </a>
+            </div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+  {% endif %}
+
+
+
+  {%- comment -%}
+  {% if banner_enabled %}
     {% for block in section.blocks %}
       {% if block.type == 'banner' and template.name == 'index' %}
-
         {% assign section_color = block.settings.overlay_text_color %}
         {% if block.settings.image %}
-        <div class="banner  relative {% unless block.settings.image_style == 'fit_content' %}full--vh full--w{% endunless %} js banner_image full--w" data-banner-image>
-          
-          {% assign feature_image = block.settings.image %}
-          {% assign feature_image_mobile = block.settings.image_mobile %}
-          {% if block.settings.image_style == 'fit_content' %}
-            <div {% if feature_image_mobile %}class="md--dn--hide"{% endif %}>
-            {% render 'responsive-image' with
-              image: feature_image,
-              max_width: 2000,
-              max_height: 2000,
-              section_color: section_color,
-            %}
-            </div>
-            {% if feature_image_mobile %}
-            <div class="lg--up--hide">
-            {% render 'responsive-image' with
-              image: feature_image_mobile,
-              max_width: 2000,
-              max_height: 2000,
-              section_color: section_color,
-            %}
-            </div>
-            {% endif %}
-          {% else %}
-            <div class="lazyload bg-cover absolute top--0 right--0 bottom--0 left--0 {% if feature_image_mobile %}md--dn--hide{% endif %}"
-                data-bgset="{% render 'bgset', image: feature_image %}"
-                data-sizes="auto"
-                data-parent-fit="cover"
-                >
-            </div>
-            {% if feature_image_mobile %}
-            <div class="lazyload bg-cover absolute top--0 right--0 bottom--0 left--0 lg--up--hide"
-                data-bgset="{% render 'bgset', image: feature_image_mobile %}"
-                data-sizes="auto"
-                data-parent-fit="cover"
-                >
-            </div>
-            {% endif %}
-          {% endif %}
+          <div class="banner  relative {% unless block.settings.image_style == 'fit_content' %}full--vh full--w{% endunless %} js banner_image full--w" data-banner-image>
 
-          {%- assign heading = block.settings.heading -%}
-          {%- assign cta_text = block.settings.cta_text -%}
-          {%- assign cta_url = block.settings.cta_url -%}
-          {%- assign content_position = block.settings.content_position -%}
-          {%- assign text_align = block.settings.text_align -%}
-          {% if cta_url != blank or heading != blank %}
-          <div class="absolute top--0 right--0  bottom--0 left--0  px2 py4 lg--up--px3 wd--p5 z1">
-            {% assign content_position = content_position | split: ' ' %}
-            <div class="table full {% if section.settings.show_announcement %}{% if section.settings.home_page_only == false or template.name == 'index' %}pt3{% endif %}{% endif %}">
-              <div class="table-cell {{ content_position[0] }} {{ content_position[1] }}">
-                <div class="inline-block {{ text_align }} three-quarters lg--up--two-thirds">
-                  <div class="one-whole">
-                    {% if heading != blank %}
-                      <h2 class="color--{{ section_color }}-text f--heading font-size--xxxl line-height--8 pm--font-size--xxxxxl pm--line-height--11 wd--font-size--xxxxxxl wd--line-height--13">{{ heading }}</h2>
-                    {% endif %}
-                    {% if cta_url != blank %}
-                      <a class="mt2 btn border--none btn--add-to-cart relative color-scheme--{{ section_color }} border--none bg--{{ section_color }}-text color--{{ section_color }}-text--overlay hover-bg--{{ section_color }} p1 px2 inline-block" href="{{ cta_url }}" target="_blank" >
-                        {{ cta_text }}
-                      </a>
-                    {% endif %}
+            {% assign feature_image = block.settings.image %}
+            {% assign feature_image_mobile = block.settings.image_mobile %}
+            {% if block.settings.image_style == 'fit_content' %}
+              <div {% if feature_image_mobile %}class="md--dn--hide"{% endif %}>
+              {% render 'responsive-image' with
+                image: feature_image,
+                max_width: 2000,
+                max_height: 2000,
+                section_color: section_color,
+              %}
+              </div>
+              {% if feature_image_mobile %}
+              <div class="lg--up--hide">
+              {% render 'responsive-image' with
+                image: feature_image_mobile,
+                max_width: 2000,
+                max_height: 2000,
+                section_color: section_color,
+              %}
+              </div>
+              {% endif %}
+            {% else %}
+              <div class="lazyload bg-cover absolute top--0 right--0 bottom--0 left--0 {% if feature_image_mobile %}md--dn--hide{% endif %}"
+                  data-bgset="{% render 'bgset', image: feature_image %}"
+                  data-sizes="auto"
+                  data-parent-fit="cover"
+                  >
+              </div>
+              {% if feature_image_mobile %}
+              <div class="lazyload bg-cover absolute top--0 right--0 bottom--0 left--0 lg--up--hide"
+                  data-bgset="{% render 'bgset', image: feature_image_mobile %}"
+                  data-sizes="auto"
+                  data-parent-fit="cover"
+                  >
+              </div>
+              {% endif %}
+            {% endif %}
+
+            {%- assign heading = block.settings.heading -%}
+            {%- assign cta_text = block.settings.cta_text -%}
+            {%- assign cta_url = block.settings.cta_url -%}
+            {%- assign content_position = block.settings.content_position -%}
+            {%- assign text_align = block.settings.text_align -%}
+            {% if cta_url != blank or heading != blank %}
+            <div class="absolute top--0 right--0  bottom--0 left--0  px2 py4 lg--up--px3 wd--p5 z1">
+              {% assign content_position = content_position | split: ' ' %}
+              <div class="table full {% if section.settings.show_announcement %}{% if section.settings.home_page_only == false or template.name == 'index' %}pt3{% endif %}{% endif %}">
+                <div class="table-cell {{ content_position[0] }} {{ content_position[1] }}">
+                  <div class="inline-block {{ text_align }} three-quarters lg--up--two-thirds">
+                    <div class="one-whole">
+                      {% if heading != blank %}
+                        <h2 class="color--{{ section_color }}-text f--heading font-size--xxxl line-height--8 pm--font-size--xxxxxl pm--line-height--11 wd--font-size--xxxxxxl wd--line-height--13">{{ heading }}</h2>
+                      {% endif %}
+                      {% if cta_url != blank %}
+                        <a class="mt2 btn border--none btn--add-to-cart relative color-scheme--{{ section_color }} border--none bg--{{ section_color }}-text color--{{ section_color }}-text--overlay hover-bg--{{ section_color }} p1 px2 inline-block" href="{{ cta_url }}" target="_blank" >
+                          {{ cta_text }}
+                        </a>
+                      {% endif %}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
+            {% endif %}
+            <div class="absolute bottom--0 left--0 right--0 flex items--center justify--center p2 z3">
+              <a class="block pointer"  data-banner-scroll>
+                <button class="btn border--none border--none bg--transparent color--{{ section_color }}-text hv--primary-accent font-size--l">{% render 'icon-arrow-down' %}</button>
+              </a>
+            </div>
           </div>
-          {% endif %}
-          <div class="absolute bottom--0 left--0 right--0 flex items--center justify--center p2 z3">
-            <a class="block pointer"  data-banner-scroll>
-              <button class="btn border--none border--none bg--transparent color--{{ section_color }}-text hv--primary-accent font-size--l">{% render 'icon-arrow-down' %}</button>
-            </a>
-          </div>
-        </div>
         {% else %}
         <div class="banner__placeholder  relative {% unless block.settings.image_style == 'fit_content' %}full--vh full--w{% endunless %} bg--placeholder-dark js banner_image full--w"
           data-banner-image>
@@ -415,6 +492,7 @@
       {% endif %}
     {% endfor %}
   {% endif %}
+  {%- endcomment -%}
 
 </div>
 
@@ -613,12 +691,6 @@
               { "value": "white", "label": "White"},
               { "value": "black", "label": "Black"}
             ]
-          },
-          {
-            "type": "image_picker",
-            "id": "logo_alternate",
-            "label": "Logo image",
-            "info": "Alternate logo for the banner image"
           },
           {
             "type": "header",
