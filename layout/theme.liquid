@@ -67,6 +67,7 @@
   <script async type="text/javascript" data-api-key="" id="stamped-script-widget" src="https://cdn-stamped-io.azureedge.net/files/widget.min.js"></script>
 
   {{ content_for_header }}
+{% render 'globo.stores.script' %}
 
 </head>
 
@@ -94,5 +95,5 @@
   {% render 'ajax-cart-template' %} 
   
 
-</body>
+{% render 'globo.stores.action' %}</body>
 </html>
