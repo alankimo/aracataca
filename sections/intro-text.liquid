@@ -1,0 +1,107 @@
+{%- assign section_color = section.settings.color_scheme -%}
+
+
+{%- assign custom_grid_width = 'lg--up--three-quarters' -%}
+{%- if section.settings.title == blank and section.settings.description == blank and section.settings.cta_url == blank -%}
+  {%- assign custom_grid_width = 'lg--up--one-whole' -%}
+{%- endif -%}
+
+<section class="intro-text section-with-padding color--{{ section_color }}-text bg--{{ section_color }}-background" data-section-type="intro-text" data-section-id="{{ section.id }}">
+  <div class="max-site-width lg--up--px3">
+    <div class="grid">
+        <div class="grid__item lg--up--one-whole">
+          <div class="px2 lg--up--px0">
+            <div class="intro-text__content intro-text__content--{{ section.settings.text_align }}">
+              {{ section.settings.section_text }}
+
+              {% if section.settings.cta_url %}
+                <a class="inline-block homepage-more-link  font-size__basic  f--accent link-underline--{{ section_color }}  hover-underline--{{ section_color }} " href="{{ section.settings.cta_url }}" >
+                  {{ section.settings.cta_text }}
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+    </div>
+  </div>
+</section>
+
+{% style %}
+  .intro-text__content p {
+    font-size: {{ section.settings.text_font_size }}px;
+  }
+{% endstyle %}
+
+{% schema %}
+{
+  "name": "Intro Text",
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "section_text",
+      "label": "Text",
+      "default": "<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Cras malesuada urna est, vel sollicitudin dui laoreet et.<br>Ut at magna purus. Cras maximus lobortis lacus a rutrum. Phasellus placerat facilisis quam a pretium. <br>Praesent finibus nisi quis mollis malesuada.</p>"
+    },
+    {
+      "type": "range",
+      "id": "text_font_size",
+      "label": "Text font size",
+      "unit": "px",
+      "min": 18,
+      "max": 40,
+      "step": 1,
+      "default": 28
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text align",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ]
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Optional: Call to action URL"
+    },
+    {
+      "type": "text",
+      "id": "cta_text",
+      "label": "Call to action button text",
+      "default": "Shop Now"
+    },
+    {
+      "type": "header",
+      "content": "Color"
+    },
+    {
+       "type": "select",
+       "id": "color_scheme",
+       "label": "Color scheme",
+       "options": [
+          { "value": "primary", "label": "Primary"},
+          { "value": "secondary ", "label": "Secondary"},
+          { "value": "tertiary", "label": "Tertiary"}
+       ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Intro text",
+      "category": "Text"
+    }
+  ]
+}
+{% endschema %}
