@@ -2,35 +2,35 @@
   "shopify": {
     "checkout": {
       "contact": {
-        "shipping_address_title": "Pickup information"
+        "shipping_address_title": "Información de recogida"
       },
       "thank_you": {
         "marker": {
-          "shipping": "Pickup address"
+          "shipping": "Dirección de entrega"
         },
-        "shipping_address_title": "Pickup address"
+        "shipping_address_title": "Dirección de entrega"
       },
       "general": {
-        "continue_to_shipping_method": "Continue"
+        "continue_to_shipping_method": "Continuar"
       },
       "order_summary": {
-        "free_shipping_discount_label": "Free pickup",
-        "shipping_label": "Store Pickup"
+        "free_shipping_discount_label": "Recogida gratuita",
+        "shipping_label": "Recoger en tienda"
       },
       "shipping": {
-        "title": "Store Pickup",
-        "waiting_on_rate_notice": "Please wait while we fetch available pickup rates...",
-        "no_rates_for_cart_or_destination_notice": "Pickup is not available for your cart or destination.",
-        "no_rates_for_country_notice": "We don't offer pickups in {{country }}.",
-        "please_enter_your_shipping_information_notice": "Please go back to the shopping cart page and choose a pickup location."
+        "title": "Recoger en tienda",
+        "waiting_on_rate_notice": "Espere mientras buscamos las tarifas de recogida disponibles ...",
+        "no_rates_for_cart_or_destination_notice": "La recogida no está disponible para su carrito o destino.",
+        "no_rates_for_country_notice": "No ofrecemos recogidas en {{country}}.",
+        "please_enter_your_shipping_information_notice": "Regrese a la página del carrito de compras y elija un lugar de recogida."
       },
       "payment": {
-        "same_billing_address_label": "Please use the option below ⬇",
-        "different_billing_address_label": "Use a different billing address"
+        "same_billing_address_label": "Utilice la siguiente opción ⬇",
+        "different_billing_address_label": "Utilice una dirección de facturación diferente"
       },
       "review": {
         "blocks": {
-          "shipping_address_title": "Delivery To"
+          "shipping_address_title": "Entregar a"
         }
       }
     }

@@ -1,13 +1,13 @@
-release:
+develop:
   password: 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
-  theme_id: "100418453549"
+  theme_id: "100418420781"
   store: aracataca-plantas.myshopify.com
   ignore_files:
   - settings_data.json
   - es.json
-develop:
+release:
   password: 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
-  theme_id: "100418420781"
+  theme_id: "100418453549"
   store: aracataca-plantas.myshopify.com
   ignore_files:
   - settings_data.json

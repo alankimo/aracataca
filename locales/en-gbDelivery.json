@@ -2,35 +2,35 @@
   "shopify": {
     "checkout": {
       "contact": {
-        "shipping_address_title": "Delivery information"
+        "shipping_address_title": "Información de entrega"
       },
       "thank_you": {
         "marker": {
-          "shipping": "Delivery address"
+          "shipping": "Dirección de entrega"
         },
-        "shipping_address_title": "Delivery address"
+        "shipping_address_title": "Dirección de entrega"
       },
       "general": {
-        "continue_to_shipping_method": "Continue"
+        "continue_to_shipping_method": "Continuar"
       },
       "order_summary": {
-        "free_shipping_discount_label": "Free Delivery",
-        "shipping_label": "Local Delivery"
+        "free_shipping_discount_label": "Entrega gratis",
+        "shipping_label": "Entrega local"
       },
       "shipping": {
-        "title": "Local Delivery",
-        "waiting_on_rate_notice": "Please wait...",
-        "no_rates_for_cart_or_destination_notice": "Delivery is not available for your cart or destination.",
-        "no_rates_for_country_notice": "We don't offer delivery in {{country }}.",
-        "please_enter_your_shipping_information_notice": "Please go back to the shopping cart page and provide a postal code."
+        "title": "Entrega local",
+        "waiting_on_rate_notice": "Por favor espere...",
+        "no_rates_for_cart_or_destination_notice": "La entrega no está disponible para su carrito o destino.",
+        "no_rates_for_country_notice": "No ofrecemos entrega en {{país}}.",
+        "please_enter_your_shipping_information_notice": "Regrese a la página del carrito de compras y proporcione un código postal."
       },
       "payment": {
-        "same_billing_address_label": "Please use the option below ⬇",
-        "different_billing_address_label": "Use a different billing address"
+        "same_billing_address_label": "Utilice la siguiente opción ⬇",
+        "different_billing_address_label": "Utilice una dirección de facturación diferente"
       },
       "review": {
         "blocks": {
-          "shipping_address_title": "Delivery To"
+          "shipping_address_title": "Entregar a"
         }
       }
     }
