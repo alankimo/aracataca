@@ -1,3 +1,10 @@
+// Colors
+$success-green: #4caf50;
+$white: #ffffff;
+
+// Breakpoints
+$theme-desktop: 990px;
+
 // Intro text [ Section ]
 .intro-text__content {
   max-width: 768px;
@@ -39,5 +46,35 @@
   .methodDescription,
   .store-content {
     display:  none !important;
+  }
+}
+
+// Dynamic Section [ Contact Form ]
+.contact-form-section {
+  padding-top: 2.5em;
+}
+
+// Form messsages
+.form-success {
+  background: $success-green;
+  color: $white;
+  padding: 1em;
+}
+
+.errors {
+  padding: 1em;
+}
+
+.grid--one-element {
+  margin: 0;
+}
+
+.grid__item--single-form {
+  padding-left: 0;
+  width: 100%;
+
+  form {
+    margin: 0 auto;
+    max-width: 800px;
   }
 }

@@ -1,0 +1,103 @@
+{% assign only_form = false %}
+
+{% if section.settings.contact_heading == blank and section.settings.contact_form_richtext == blank %}
+  {% assign only_form = true %}
+{% endif %}
+
+
+<div class="lg--up--seven-eighths mx--auto px2">
+  <div class="grid {% if only_form %} grid--one-element {% endif %}">
+    {% unless only_form %}
+      <div class="grid__item lg--up--two-fifths">
+        {% if section.settings.contact_heading != blank %}
+          <h1 class="f--heading font-size__heading m0">{{ section.settings.contact_heading }}</h1>
+        {% endif %}
+        {% if section.settings.contact_form_richtext != blank %}
+          <div class="rte mt2  font-size__basic">
+            {{ section.settings.contact_form_richtext }}
+          </div>
+        {% endif %}
+      </div>
+    {% endunless %}
+    <div class="grid__item lg--up--three-fifths lg--up--mt0 {% if only_form %} grid__item--single-form {% endif %}">
+
+      {% form 'contact' %}
+
+        {% if form.posted_successfully? %}
+          <p class="form-success">
+            {{ 'contact.form.post_success' | t }}
+          </p>
+        {% endif %} 
+
+        {{ form.errors | default_errors }}
+
+        <label class="mt2 block" for="ContactFormName">{{ 'contact.form.name' | t }}</label>
+        <input type="text"
+          class="block mt1 full--w px2 py1 bg--transparent border--{{ section_color }}-text"
+          name="contact[name]"
+          id="ContactFormName"
+          placeholder="{{ 'contact.form.name' | t }}"
+          value="{% if form[name] %}{{ form[name] }}{% elsif customer %}{{ customer.name }}{% endif %}">
+
+        <label class="mt2 block" for="ContactFormEmail">{{ 'contact.form.email' | t }}</label>
+        <input type="email"
+          class="block mt1 full--w  px2 py1 bg--transparent border--{{ section_color }}-text"
+          name="contact[email]"
+          id="ContactFormEmail"
+          placeholder="{{ 'contact.form.email' | t }}"
+          value="{% if form.email %}{{ form.email }}{% elsif customer %}{{ customer.email }}{% endif %}"
+          spellcheck="false"
+          autocomplete="off"
+          autocapitalize="off">
+
+        <label class="mt2 block" for="ContactFormPhone">{{ 'contact.form.phone' | t }}</label>
+        <input type="tel"
+          class="block mt1 full--w px2 py1 bg--transparent border--{{ section_color }}-text"
+          name="contact[phone]"
+          id="ContactFormPhone"
+          placeholder="{{ 'contact.form.phone' | t }}"
+          value="{% if form[phone] %}{{ form[phone] }}{% elsif customer %}{{ customer.phone }}{% endif %}"
+          pattern="[0-9\-]*">
+
+        <label class="mt2 block" for="ContactFormMessage">{{ 'contact.form.message' | t }}</label>
+        <textarea rows="10"
+          class="block mt1 full--w  px2 py1 bg--transparent border--{{ section_color }}-text"
+          name="contact[body]"
+          id="ContactFormMessage"
+          placeholder="{{ 'contact.form.message' | t }}">{%- if form.body -%}{{ form.body }}{%- endif -%}</textarea>
+
+        <input type="submit" class="block full--w max-width--1 btn border--none mt3 px2 py1 bg--{{ section_color }}-text color--{{ section_color }}-text--overlay hover-bg--{{ section_color }}" value="{{ 'contact.form.send' | t }}">
+
+      {% endform %}
+
+    </div>
+  </div>
+</div>
+
+
+{% schema %}
+{
+  "name": "Contact Form",
+  "class": "contact-form-section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "contact_heading",
+      "label": "Heading",
+      "default": "Contact Form"
+    },
+    {
+      "type": "richtext",
+      "id": "contact_form_richtext",
+      "label": "Text",
+      "default": "<p>Contact <b>Lorem Ipsum</b></p>"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Contact Form",
+      "category": "Form"
+    }
+  ]
+}
+{% endschema %}
