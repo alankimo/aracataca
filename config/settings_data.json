@@ -361,7 +361,7 @@
         "type": "featured-collection",
         "settings": {
           "title": "Plantitas",
-          "collection": "plantas-kodea",
+          "collection": "plantas",
           "no_products": "3",
           "subheading": "Plantas para tu casa, oficina, negocio...",
           "enable_mobile_flickity": true,
@@ -380,15 +380,33 @@
           "show_collection_link": true,
           "color_scheme": "tertiary"
         }
+      },
+      "1602167993648": {
+        "type": "insta-app",
+        "settings": {}
+      },
+      "1602168995410": {
+        "type": "stamped-home",
+        "settings": {}
+      },
+      "product-recommendations": {
+        "type": "product-recommendations",
+        "settings": {
+          "show_product_recommendations": false,
+          "product_recommendations_heading": "You may also like",
+          "color_scheme": "primary"
+        }
       }
     },
     "content_for_index": [
       "1601592097835",
       "1600373564087",
-      "1600373424407",
-      "1600372673183",
-      "1602161676465",
       "1602161626584",
+      "1602161676465",
+      "1600372673183",
+      "1600373424407",
+      "1602167993648",
+      "1602168995410",
       "1601592670558"
     ]
   },

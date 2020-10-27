@@ -46,7 +46,7 @@
                   data-shopify-xr
                   data-shopify-model3d-id="{{ first_3d_model.id }}"
                   data-shopify-title="{{ product.title }}"
-                  data-shopify-xr-hidden
+                  data-shopify-xr-hidden 
                 >
                   {% render 'media-badge-model' %}<span class='product-single__view-in-space-text'>{{ 'products.product.view_in_space' | t }}</span>
                 </button>
@@ -151,6 +151,9 @@
           {%- else -%}
           <h1 class="f--heading f--heading font-size__heading m0 {% unless section.settings.show_vendor and product.vendor != blank %}mb1{% endunless %}">{{ product.title }}</h1>
           {%- endif -%}
+          
+          <!-- Stamped --> 
+          <span class="stamped-product-reviews-badge stamped-main-badge" data-id="{{ product.id }}" data-product-sku="{{ product.handle }}" data-product-type="{{product.type}}" data-product-title="{{product.title}}" style="display: inline-block;">{{ product.metafields.stamped.badge }}</span>
 
           {% if section.settings.show_vendor and product.vendor != blank %}
           <p class="f--body font-size--ml m0 mb1">{{ product.vendor }}</p>

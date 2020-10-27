@@ -182,6 +182,37 @@
       </div>
 
     </div>
+  
+    {% if order.attributes %}
+      {% assign attributes = order.attributes %}
+      {% assign format = '%A, %B %e, %Y at %I:%M %P' %}
+      {% if attributes["Shipping Method"] == "Store Pickup" or attributes["Shipping Method"] == "Local Delivery" %}
+      <div style="background: #fff;background-clip: padding-box;border: 1px solid #d9d9d9;border-radius: 5px;color: #545454;padding: 16px;margin-top: 30px;margin-bottom: -2em;">
+        {% if attributes["Shipping Method"] == "Store Pickup" %}
+        {% assign length = attributes["Pickup date"] | size %}
+        {% if length == 10 %}{% assign format = '%A, %B %e, %Y' %}{% endif %}
+        <h2 style="color:#333333;font-size:18px;line-height:23px">Store pickup infomation</h2>
+        <div style="margin-top: 10px">
+          <ul>
+            <li><strong>Store name</strong>: {{attributes["Store name"]}}</li>
+            <li><strong>Store address</strong>: {{attributes["Store address"]}}</li>
+            {% if attributes["Pickup date"] %}<li><strong>Pickup date</strong>: {{attributes["Pickup date"] | date: format}}</li>{% endif %}
+          </ul>
+        </div>
+        {% elsif attributes["Shipping Method"] == "Local Delivery" %}
+        {% assign length = attributes["Receipt date"] | size %}
+        {% if length == 10 %}{% assign format = '%A, %B %e, %Y' %}{% endif %}
+        <h2 style="color:#333333;font-size:18px;line-height:23px">Local delivery infomation</h2>
+        <div style="margin-top: 10px">
+          <ul>
+            <li><strong>Postal code</strong>: {{attributes["Postal code"]}}</li>
+            {% if attributes["Receipt date"] %}<li><strong>Delivery date</strong>: {{attributes["Receipt date"] | date: format}}</li>{% endif %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      {% endif %}
+    {% endif %}
   </div>
 </section>
 
