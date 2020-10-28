@@ -51,18 +51,25 @@ $theme-desktop: 990px;
 
 // Dynamic Section [ Contact Form ]
 .contact-form-section {
+  padding-bottom: 2.5em;
   padding-top: 2.5em;
 }
 
 // Form messsages
-.form-success {
-  background: $success-green;
-  color: $white;
-  padding: 1em;
-}
-
-.errors {
-  padding: 1em;
+.contact-form {
+  .form-success {
+    background: $success-green;
+    color: $white;
+    font-weight: bold;
+    margin: 1.2em 0 0;
+  }
+  
+  .errors {
+    color: $white;
+    font-weight: bold;
+    margin: 1.2em 0 0;
+    padding: .625rem 1.25rem;
+  }
 }
 
 .grid--one-element {
