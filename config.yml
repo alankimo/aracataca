@@ -5,6 +5,13 @@ develop:
   ignore_files:
     - settings_data.json
     - es.json
+develop-gamma:
+  password: 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
+  theme_id: "100507746349"
+  store: aracataca-plantas.myshopify.com
+  ignore_files:
+    - settings_data.json
+    - es.json
 release:
   password: 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
   theme_id: "100418453549"
